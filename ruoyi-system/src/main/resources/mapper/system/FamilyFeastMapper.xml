@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.feast.FamilyFeastMapper">
+    
+    <resultMap type="FamilyFeast" id="FamilyFeastResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="money"    column="money"    />
+        <result property="moneyTotal"    column="money_total"    />
+        <result property="address"    column="address"    />
+        <result property="date"    column="date"    />
+        <result property="dataStatus"    column="data_status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectFamilyFeastVo">
+        select id, name, money, money_total, address, date, data_status, create_by, create_time, update_by, update_time from family_feast
+    </sql>
+
+    <select id="list" parameterType="FamilyFeast" resultMap="FamilyFeastResult">
+        <include refid="selectFamilyFeastVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="money != null "> and money = #{money}</if>
+            <if test="moneyTotal != null "> and money_total = #{moneyTotal}</if>
+            <if test="address != null  and address != ''"> and address = #{address}</if>
+            <if test="date != null "> and date = #{date}</if>
+            <if test="dataStatus != null "> and data_status = #{dataStatus}</if>
+        </where>
+    </select>
+    
+    <select id="getDetail" parameterType="Long" resultMap="FamilyFeastResult">
+        <include refid="selectFamilyFeastVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insert" parameterType="FamilyFeast" useGeneratedKeys="true" keyProperty="id">
+        insert into family_feast
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="money != null">money,</if>
+            <if test="moneyTotal != null">money_total,</if>
+            <if test="address != null">address,</if>
+            <if test="date != null">date,</if>
+            <if test="dataStatus != null">data_status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="money != null">#{money},</if>
+            <if test="moneyTotal != null">#{moneyTotal},</if>
+            <if test="address != null">#{address},</if>
+            <if test="date != null">#{date},</if>
+            <if test="dataStatus != null">#{dataStatus},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+         </trim>
+    </insert>
+
+    <update id="updateById" parameterType="FamilyFeast">
+        update family_feast
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="money != null">money = #{money},</if>
+            <if test="moneyTotal != null">money_total = #{moneyTotal},</if>
+            <if test="address != null">address = #{address},</if>
+            <if test="date != null">date = #{date},</if>
+            <if test="dataStatus != null">data_status = #{dataStatus},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        delete from family_feast where id = #{id}
+    </delete>
+
+    <delete id="deleteFamilyFeastByIds" parameterType="String">
+        delete from family_feast where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>

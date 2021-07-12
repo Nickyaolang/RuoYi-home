@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.SysCodeMapper">
+
+    <!-- 批量插入代码类型 -->
+    <insert id="batchInsertCodeType" useGeneratedKeys="true" keyProperty="id">
+        INSERT IGNORE INTO sys_code_type (code_keys, type_name, type_label, create_time, create_by)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.codeKeys}, #{item.typeName}, #{item.typeLabel}, now(), #{item.createBy})
+        </foreach>
+    </insert>
+
+    <!-- 批量插入代码列表 -->
+    <insert id="batchInsertCodeList" useGeneratedKeys="true" keyProperty="id">
+        INSERT INTO sys_code_list (type_id, code_label, code_value, create_time, create_by)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.typeId}, #{item.codeLabel}, #{item.codeValue}, now(), #{item.createBy})
+        </foreach>
+    </insert>
+
+    <!-- 查询代码列表 -->
+    <select id="selectCodeList" resultType="SysCodeList">
+        SELECT a.id, a.code_label as codeLabel, b.code_keys AS typeIdStr FROM sys_code_list a, sys_code_type b
+        WHERE a.type_id = b.id AND a.type_id IN
+        <foreach collection="list" item="typeId" open="(" separator="," close=")">
+            #{typeId}
+        </foreach>
+    </select>
+</mapper>

@@ -1,0 +1,160 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<div th:fragment="searchHtml">
+    <form id="search_form" class="layui-form layui-form-pane">
+        <input type="hidden" id="birthplace" name="birthplace" th:value="*{birthplace}">
+        <div class="row">
+            <div class="col-sm-3">
+                <div class="layui-form-item">
+                    <label class="layui-form-label">姓名</label>
+                    <div class="layui-input-block">
+                        <input type="text" name="name" autocomplete="off" class="layui-input">
+                    </div>
+                </div>
+            </div>
+            <div class="col-sm-3">
+                <div class="layui-form-item">
+                    <button class="layui-btn" lay-submit lay-filter="search_btn">
+                        <i class="fa fa-search"></i>
+                        <span class="bold">查询</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<div th:fragment="tableHtml">
+    <h3>人口信息 - 列表</h3>
+    <hr class="layui-bg-gray">
+    <div id="toolbar">
+        <button id="add_btn" type="button" class="btn btn-primary" sec:authorize="hasAuthority('POPU_BASE_ADD')">
+            <i class="fa fa-plus"></i>
+            <span class="bold">新增</span>
+        </button>
+    </div>
+
+    <table id="bootstrap_table">
+        <thead>
+        <tr>
+            <th data-checkbox="true" data-width="50px"></th>
+            <th data-align="center" data-field="id" data-sortable="true">ID</th>
+            <th data-align="center" data-field="name">姓名</th>
+            <th data-align="center" data-field="formerName">曾用名</th>
+            <th data-align="center" data-field="idCardNumber">公民身份证号码</th>
+            <th data-align="center" data-field="sexStr">性别</th>
+            <th data-align="center" data-field="birthDate">出生日期</th>
+            <th data-align="center" data-field="birthplaceStr">籍贯</th>
+            <th data-align="center" data-field="areaName">行政区划</th>
+            <th data-align="center" data-field="dataStatus" data-formatter="statusColumnFormatter">状态</th>
+            <th data-align="center" data-field="createBy">创建者</th>
+            <th data-align="center" data-field="createTime" data-sortable="true">创建时间</th>
+            <th data-align="center" data-events="window.operateEvents" data-formatter="operateColumnFormatter">操作</th>
+        </tr>
+        </thead>
+    </table>
+</div>
+<div th:fragment="indexJs">
+    <script th:inline="javascript" type="text/javascript">
+        var prefix = ctx + "popu/base";
+        $(function () {
+            prepareLayout();
+            prepareSearchForm();
+            prepareTableList();
+            
+        });
+
+        /* 页面布局 */
+        function prepareLayout() {
+            $('body').layout({initClosed: false, west__size: 230});
+        }
+
+
+        /* 查询表单 */
+        function prepareSearchForm() {
+        	layui.use(['layer','form'], function () {
+        		var $ = layui.jquery;
+
+                // 行政区划多级下拉框
+                $(".downpanel").on("click", ".layui-select-title", function (e) {
+                    $(".layui-form-select").not($(this).parents(".layui-form-select")).removeClass("layui-form-selected");
+                    $(this).parents(".downpanel").toggleClass("layui-form-selected");
+                    layui.stope(e);
+                }).on("click", ".ztree", function (e) {
+                    layui.stope(e);
+                });
+                
+                layui.form.on('submit(search_btn)', function(){
+                    alert("搜索")
+                });
+            });
+        }
+
+        /* 分页表单列表 */
+        function prepareTableList() {
+            $("#add_btn").on("click", function () {
+                $.lq.modal.openOptions({
+                    content: prefix + "/add",
+                    title: ['添加人口']
+                });
+            });
+
+            var options = {method: "post", url : prefix + "/list"};
+        }
+
+        /* 人口管理 - 状态显示 */
+        function statusColumnFormatter(value, row) {
+            if (hasChangeStatus) {
+                if (value == 1) {
+                    return '<i class="fa fa-toggle-on text-success fa-lg cursor-p" onclick="disable(' + row.id + ')"/>';
+                } else {
+                    return '<i class="fa fa-toggle-off text-info fa-lg cursor-p" onclick="enabled(' + row.id + ')"/>';
+                }
+            } else {
+                if (value == 1) {
+                    return '<i class="fa fa-toggle-on text-success fa-lg"/>';
+                } else {
+                    return '<i class="fa fa-toggle-off text-info fa-lg"/>';
+                }
+            }
+        }
+
+        /* 表单操作列处理 */
+        function operateColumnFormatter () {
+            var html = [];
+            html.push('<div class="">');
+            // 删除按钮
+            if (hasDelete) {
+                html.push('<button type="button" class="btn btn-xs btn-outline btn-danger delete">');
+                html.push('&nbsp;&nbsp;删除&nbsp;&nbsp;');
+                html.push('</button>&nbsp;&nbsp;');
+            }
+            // 修改按钮
+            if (hasUpdate) {
+                html.push('<button type="button" class="btn btn-xs btn-outline btn-warning update">');
+                html.push('&nbsp;&nbsp;编辑&nbsp;&nbsp;');
+                html.push('</button>&nbsp;&nbsp;');
+            }
+            html.push('</div>');
+            return html.join('');
+        }
+
+        /* 表单操作列监听事件 */
+        window.operateEvents = {
+            'click .delete': function (e, value, row) {
+                $.lq.modal.confirm("确定删除此条信息吗？", function () {
+                    $.lq.operate.post(prefix + "/remove", { "id": row.id }, function () {
+                        alert("删除")
+                    });
+                })
+            },
+            'click .update': function (e, value, row) {
+                $.lq.modal.openOptions({
+                    content: prefix + "/edit/" + row.id,
+                    title: ['修改人口']
+                });
+            }
+        };
+    </script>
+</div>

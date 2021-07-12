@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.system.mapper.family.FamilyPopuBaseMapper">
+    
+    <resultMap type="FamilyPopuBase" id="FamilyPopuBaseResult">
+        <result property="id"    column="id"    />
+        <result property="name"    column="name"    />
+        <result property="birthday"    column="birthday"    />
+        <result property="phone"    column="phone"    />
+        <result property="nowAddress"    column="now_address"    />
+        <result property="dataStatus"    column="data_status"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="updateBy"    column="update_by"    />
+        <result property="updateTime"    column="update_time"    />
+    </resultMap>
+
+    <sql id="selectFamilyPopuBaseVo">
+        SELECT
+          id,
+          NAME,
+          CONCAT(YEAR(NOW()),DATE_FORMAT(birthday,'%m%d')) as birthday,
+          phone,
+          job,
+          now_address,
+          CASE
+            WHEN now_address = 1
+            THEN '贵州'
+            WHEN now_address = 2
+            THEN '重庆'
+            WHEN now_address = 3
+            THEN '湖北'
+          END AS address,
+          data_status,
+          create_by,
+          create_time,
+          update_by,
+          update_time,
+          notice
+        FROM
+          family_popu_base
+    </sql>
+
+    <select id="list" parameterType="FamilyPopuBase" resultMap="FamilyPopuBaseResult">
+        <include refid="selectFamilyPopuBaseVo"/>
+        <where>  
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="birthday != null "> and birthday = #{birthday}</if>
+            <if test="phone != null  and phone != ''"> and phone = #{phone}</if>
+            <if test="nowAddress != null "> and now_address = #{nowAddress}</if>
+            <if test="dataStatus != null "> and data_status = #{dataStatus}</if>
+        </where>
+    </select>
+    
+    <select id="getDetail" parameterType="Long" resultMap="FamilyPopuBaseResult">
+        <include refid="selectFamilyPopuBaseVo"/>
+        where id = #{id}
+    </select>
+    <select id="queryBirthday" resultType="java.util.Map">
+        SELECT
+          NAME,
+          DATE_FORMAT(birthday, '%Y-%m-%d') AS birthday
+        FROM
+          `family_popu_base`
+        WHERE DATEDIFF(
+            CONCAT(
+              YEAR(NOW()),
+              DATE_FORMAT(birthday, '-%m-%d')
+            ),
+            DATE_FORMAT(NOW(), '%Y-%m-%d')
+          ) = 7
+    </select>
+
+    <insert id="insert" parameterType="FamilyPopuBase" useGeneratedKeys="true" keyProperty="id">
+        insert into family_popu_base
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">name,</if>
+            <if test="birthday != null">birthday,</if>
+            <if test="phone != null and phone != ''">phone,</if>
+            <if test="nowAddress != null">now_address,</if>
+            <if test="dataStatus != null">data_status,</if>
+            <if test="createBy != null">create_by,</if>
+            <if test="createTime != null">create_time,</if>
+            <if test="updateBy != null">update_by,</if>
+            <if test="updateTime != null">update_time,</if>
+            <if test="job != null">job,</if>
+            <if test="notice != null">notice,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="name != null and name != ''">#{name},</if>
+            <if test="birthday != null">#{birthday},</if>
+            <if test="phone != null and phone != ''">#{phone},</if>
+            <if test="nowAddress != null">#{nowAddress},</if>
+            <if test="dataStatus != null">#{dataStatus},</if>
+            <if test="createBy != null">#{createBy},</if>
+            <if test="createTime != null">#{createTime},</if>
+            <if test="updateBy != null">#{updateBy},</if>
+            <if test="updateTime != null">#{updateTime},</if>
+            <if test="job != null">#{job},</if>
+            <if test="notice != null">#{notice},</if>
+         </trim>
+    </insert>
+
+    <update id="updateById" parameterType="FamilyPopuBase">
+        update family_popu_base
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="name != null and name != ''">name = #{name},</if>
+            <if test="birthday != null">birthday = #{birthday},</if>
+            <if test="phone != null and phone != ''">phone = #{phone},</if>
+            <if test="nowAddress != null">now_address = #{nowAddress},</if>
+            <if test="dataStatus != null">data_status = #{dataStatus},</if>
+            <if test="createBy != null">create_by = #{createBy},</if>
+            <if test="createTime != null">create_time = #{createTime},</if>
+            <if test="updateBy != null">update_by = #{updateBy},</if>
+            <if test="updateTime != null">update_time = #{updateTime},</if>
+            <if test="job != null">job = #{job},</if>
+            <if test="notice != null">notice = #{notice},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteById" parameterType="Long">
+        delete from family_popu_base where id = #{id}
+    </delete>
+
+    <delete id="deleteByIds" parameterType="String">
+        delete from family_popu_base where id in
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
+</mapper>
